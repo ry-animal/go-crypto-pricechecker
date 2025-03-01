@@ -4,6 +4,13 @@ import { useCryptoData } from '@/hooks/useCryptoData';
 const HeroSection: React.FC = () => {
   const { prices, loading, error } = useCryptoData();
 
+  const formatMarketCap = (marketCap: number) => {
+    if (marketCap >= 1e12) return `$${(marketCap / 1e12).toFixed(2)}T`;
+    if (marketCap >= 1e9) return `$${(marketCap / 1e9).toFixed(2)}B`;
+    if (marketCap >= 1e6) return `$${(marketCap / 1e6).toFixed(2)}M`;
+    return `$${marketCap.toLocaleString()}`;
+  };
+
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-start px-6 pt-32 pb-24 sm:px-8 md:px-12">
       <div className="absolute inset-0 bg-gradient-to-b from-blue-50 to-indigo-50 dark:from-gray-950 dark:to-indigo-950 z-0" />
@@ -54,6 +61,13 @@ const HeroSection: React.FC = () => {
                     : 'text-red-500'
                     }`}>
                     {crypto.price_change_percentage_24h.toFixed(2)}%
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 dark:text-gray-400">Market Cap</span>
+                  <span className="text-gray-900 dark:text-gray-100">
+                    {formatMarketCap(crypto.market_cap)}
                   </span>
                 </div>
               </div>
