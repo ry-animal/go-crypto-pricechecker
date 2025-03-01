@@ -1,5 +1,6 @@
 import React from 'react';
 import { useCryptoData } from '@/hooks/useCryptoData';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 
 const HeroSection: React.FC = () => {
   const { prices, loading, error } = useCryptoData();
@@ -9,6 +10,19 @@ const HeroSection: React.FC = () => {
     if (marketCap >= 1e9) return `$${(marketCap / 1e9).toFixed(2)}B`;
     if (marketCap >= 1e6) return `$${(marketCap / 1e6).toFixed(2)}M`;
     return `$${marketCap.toLocaleString()}`;
+  };
+
+  const formatPriceChange = (change: number) => {
+    const isPositive = change >= 0;
+    const Icon = isPositive ? TrendingUp : TrendingDown;
+    return (
+      <div className="flex items-center space-x-1">
+        <Icon className={`w-4 h-4 ${isPositive ? 'text-green-500' : 'text-red-500'}`} />
+        <span className={`font-semibold ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
+          {Math.abs(change).toFixed(2)}%
+        </span>
+      </div>
+    );
   };
 
   return (
@@ -56,12 +70,7 @@ const HeroSection: React.FC = () => {
 
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 dark:text-gray-400">24h Change</span>
-                  <span className={`font-semibold ${crypto.price_change_percentage_24h >= 0
-                    ? 'text-green-500'
-                    : 'text-red-500'
-                    }`}>
-                    {crypto.price_change_percentage_24h.toFixed(2)}%
-                  </span>
+                  {formatPriceChange(crypto.price_change_percentage_24h)}
                 </div>
 
                 <div className="flex justify-between items-center">

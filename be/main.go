@@ -24,6 +24,13 @@ type CryptoCurrency struct {
 	PriceChangePercent float64 `json:"price_change_percentage_24h"`
 }
 
+type Cache struct {
+	data        []CryptoCurrency
+	lastUpdated time.Time
+}
+
+var cache = &Cache{}
+
 func main() {
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
@@ -70,6 +77,10 @@ func getPrices(c *fiber.Ctx) error {
 }
 
 func fetchCryptoData() ([]CryptoCurrency, error) {
+	if time.Since(cache.lastUpdated) < time.Minute && len(cache.data) > 0 {
+		return cache.data, nil
+	}
+
 	client := &http.Client{
 		Timeout: 10 * time.Second,
 	}
@@ -99,7 +110,10 @@ func fetchCryptoData() ([]CryptoCurrency, error) {
 	}
 
 	if len(allCurrencies) > 24 {
-		return allCurrencies[:24], nil
+		allCurrencies = allCurrencies[:24]
 	}
+
+	cache.data = allCurrencies
+	cache.lastUpdated = time.Now()
 	return allCurrencies, nil
 }
