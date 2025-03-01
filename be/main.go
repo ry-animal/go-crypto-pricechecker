@@ -74,7 +74,7 @@ func fetchCryptoData() ([]CryptoCurrency, error) {
 		Timeout: 10 * time.Second,
 	}
 
-	resp, err := client.Get("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=20&page=1")
+	resp, err := client.Get("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=25&page=1&sparkline=false")
 	if err != nil {
 		log.Printf("Error fetching data from CoinGecko: %v", err)
 		return nil, err
@@ -89,13 +89,17 @@ func fetchCryptoData() ([]CryptoCurrency, error) {
 
 	var allCurrencies []CryptoCurrency
 	if err := json.Unmarshal(body, &allCurrencies); err != nil {
-		log.Printf("Error unmarshaling JSON: %v", err)
-		return nil, err
+		// If array unmarshal fails, try single object
+		var singleCurrency CryptoCurrency
+		if err2 := json.Unmarshal(body, &singleCurrency); err2 != nil {
+			log.Printf("Error unmarshaling JSON: %v", err)
+			return nil, err
+		}
+		return []CryptoCurrency{singleCurrency}, nil
 	}
 
-	// Take only the first 12 currencies
-	if len(allCurrencies) > 12 {
-		return allCurrencies[:12], nil
+	if len(allCurrencies) > 24 {
+		return allCurrencies[:24], nil
 	}
 	return allCurrencies, nil
 }
